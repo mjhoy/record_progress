@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Implements hook_install
+ */
+function tracking_data_install() {
+
+  // Load in the CCK export file. This populates the variable $content
+  $filename =  drupal_get_path('module', 'tracking_data') . '/cck-export.txt';
+  $content = implode( '', file($filename) );
+
+  // Submit a "form" using content_copy_import_form()
+  // see http://groups.drupal.org/node/5272#comment-98128
+  $form_state = array(
+    'values' => array(
+      'type_name' => '<create>',
+      'macro' => $content,
+    ),
+  );
+  drupal_execute('content_copy_import_form', $form_state);
+  content_clear_type_cache();
+}
+
+/**
+ * Implements hook_uninstall
+ *
+ * Removes the tracking_data content type.
+ * TODO: should it run through the database and delete any nodes of this type?
+ */
+function tracking_data_uninstall() {
+  $t = get_t();
+
+  $content_type = 'tracking_data';
+
+  // Content fields
+  $content = content_types($content_type);
+  if (count($content['fields']) > 0) {
+    // Load up cck crud interface
+    module_load_include('inc', 'content', 'includes/content.crud');
+    foreach($content['fields'] as $key => $field) {
+      content_field_instance_delete($key, $content_type, FALSE);
+    }
+    drupal_set_message($t('cck fields have been deleted from ' . $content_type . ' content type.'));
+  }
+
+  content_clear_type_cache(TRUE);
+  menu_rebuild();
+  node_type_delete($content_type);
+}
