@@ -34,7 +34,7 @@ $content['fields']  = array (
   array (
     'label' => 'Date',
     'field_name' => 'field_data_date',
-    'type' => 'date',
+    'type' => 'datestamp',
     'widget_type' => 'date_popup',
     'change' => 'Change basic information',
     'weight' => '-4',
@@ -42,7 +42,7 @@ $content['fields']  = array (
     'default_value2' => 'same',
     'default_value_code' => '',
     'default_value_code2' => '',
-    'input_format' => 'Y M j',
+    'input_format' => 'Y, F j',
     'input_format_custom' => '',
     'year_range' => '-3:+3',
     'increment' => '30',
@@ -74,11 +74,10 @@ $content['fields']  = array (
       'year' => 'year',
       'month' => 'month',
       'day' => 'day',
-      'hour' => 'hour',
     ),
     'default_format' => 'medium',
-    'tz_handling' => 'site',
-    'timezone_db' => 'UTC',
+    'tz_handling' => 'none',
+    'timezone_db' => '',
     'op' => 'Save field settings',
     'module' => 'date',
     'widget_module' => 'date',
@@ -86,8 +85,7 @@ $content['fields']  = array (
     array (
       'value' => 
       array (
-        'type' => 'varchar',
-        'length' => 20,
+        'type' => 'int',
         'not null' => false,
         'sortable' => true,
         'views' => true,
