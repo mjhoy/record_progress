@@ -68,6 +68,13 @@ function _tracking_data_form_validate($form, &$form_state) {
     $tid = $value;
   }
   if ($tid) {
+    $q = db_query("SELECT parent FROM {term_hierarchy} WHERE tid=%d", $tid);
+    $r = db_fetch_object($q);
 
+    // If the term has a parent value of 0 in the `term_hierarchy` table,
+    // it's a 'top-level' term and is not allowed.
+    if ($r->parent == 0) {
+      form_set_error('taxonomy', t('Please specify a data type.'));
+    }
   }
 }
