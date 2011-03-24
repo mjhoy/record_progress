@@ -2,3 +2,5 @@ name = Tracking data (content type)
 description = Content type for users to track data and see their progress with a graph
 core = 6.x
 php = 5.1
+dependencies[] = content
+dependencies[] = content_copy
