@@ -4,6 +4,8 @@
  * Implements hook_install
  */
 function tracking_data_install() {
+  $td_vocab_name = "Tracking data type";
+  $t = get_t();
 
   // Load in the CCK export file. This populates the variable $content
   $filename =  drupal_get_path('module', 'tracking_data') . '/cck-export.txt';
@@ -19,6 +21,23 @@ function tracking_data_install() {
   );
   drupal_execute('content_copy_import_form', $form_state);
   content_clear_type_cache();
+
+  $q = db_query("SELECT vid FROM {vocabulary} WHERE name='" . $td_vocab_name . "';");
+  $r = db_fetch_object($q);
+  // Install the "Tracking data type" vocab
+  $vocabulary = array(
+    'name' => $td_vocab_name,
+    'multiple' => 0, //set 1 to allow multiple selection
+    'required' => 1, //set 1 to make the terms mandatory to be selected
+    'hierarchy' => 1, //set 1 to allow and create hierarchy of the terms within the vocabulary
+    'relations' => 0, //set 1 to set and allow relation amongst multiple terms
+    'module' => 'tracking_data', //provide the module name in which the vocabulary is defined and which is calling this function
+    'nodes' => array('tracking_data' => 1), //set the node to which this vocabulary will be attached to
+    'weight' => 1, //set the weight to display the vocabulary in the list
+  );
+  taxonomy_save_vocabulary($vocabulary);
+  drupal_set_message($t('Note: you\'ll need to define some taxonomy terms for the tracking data vocabulary.'));
+
 }
 
 /**
@@ -28,10 +47,10 @@ function tracking_data_install() {
  * TODO: should it run through the database and delete any nodes of this type?
  */
 function tracking_data_uninstall() {
+
   $t = get_t();
-
   $content_type = 'tracking_data';
-
+  
   // Content fields
   $content = content_types($content_type);
   if (count($content['fields']) > 0) {
