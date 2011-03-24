@@ -16,3 +16,15 @@ function tracking_data_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Called on form submission. Set the title to a generated value.
+ */
+function _tracking_data_form_submit($form, &$form_state) {
+  global $user;
+  $username = $user->name;
+
+  $date = $form_state['values']['field_data_date'][0]['value'];
+  $date_string = strftime('%d %b %Y', $date);
+
+  $form_state['values']['title'] = $username . ": data for " . $date_string;
+}
