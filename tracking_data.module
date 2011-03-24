@@ -13,6 +13,7 @@ function tracking_data_form_alter(&$form, &$form_state, $form_id) {
     // be changed after submission.
     $form['title']['#value'] = 'title';
     $form['#submit'][] = '_tracking_data_form_submit';
+    $form['#validate'][] = '_tracking_data_form_validate';
 
     // Change the title of the taxonomy field
     foreach ($form['taxonomy'] as $key => &$value) {
@@ -34,4 +35,39 @@ function _tracking_data_form_submit($form, &$form_state) {
   $date_string = strftime('%d %b %Y', $date);
 
   $form_state['values']['title'] = $username . ": data for " . $date_string;
+}
+
+/**
+ * Form validation
+ * The custom validation we do is to check and make sure that
+ * the taxonomy terms selected are *child* terms -- i.e., they
+ * have parent terms defined. This is because a separate
+ * dataset is generated for each parent term (there are only
+ * meant to be two levels of taxonomy terms). 
+ *
+ * Here's a silly example. Let's say you wanted to keep track
+ * of how much code/documentation/tests you wrote (in lines)
+ * in one graph, and how many calories throughout the day you
+ * consumed in another graph. You might structure your terms
+ * like:
+ *
+ * - Coding
+ *   `- Lines of code
+ *    - Lines of documentation
+ *    - Lines of test
+ * - Diet (calories)
+ *   `- Breakfast
+ *    - Lunch
+ *    - Dinner
+ *
+ * We want to make sure the user checks "Breakfast", and not
+ * "Diet"; and "Lines of code", and not "Coding".
+ */
+function _tracking_data_form_validate($form, &$form_state) {
+  foreach($form_state['values']['taxonomy'] as $key => $value) {
+    $tid = $value;
+  }
+  if ($tid) {
+
+  }
 }
