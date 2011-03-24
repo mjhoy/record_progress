@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * Implements hook_form_alter()
+ *
+ * Hide the title field. (It will be assigned a value on form submission.)
+ */
+function tracking_data_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'tracking_data_node_form') {
+    $form['title']['#type'] = 'hidden';
+
+    // Title field must have something in it to submit, but it will
+    // be changed after submission.
+    $form['title']['#value'] = 'title';
+    $form['#submit'][] = '_tracking_data_form_submit';
+  }
+}
+
