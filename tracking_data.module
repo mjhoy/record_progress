@@ -5,7 +5,7 @@
  *
  * Hide the title field. (It will be assigned a value on form submission.)
  */
-function tracking_data_form_alter(&$form, $form_state, $form_id) {
+function tracking_data_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'tracking_data_node_form') {
     $form['title']['#type'] = 'hidden';
 
@@ -13,6 +13,13 @@ function tracking_data_form_alter(&$form, $form_state, $form_id) {
     // be changed after submission.
     $form['title']['#value'] = 'title';
     $form['#submit'][] = '_tracking_data_form_submit';
+
+    // Change the title of the taxonomy field
+    foreach ($form['taxonomy'] as $key => &$value) {
+      if (is_numeric($key)) {
+        $value['#title'] = t('Type');
+      }
+    }
   }
 }
 
