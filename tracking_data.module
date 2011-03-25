@@ -100,6 +100,8 @@ function _tracking_data_form_validate($form, &$form_state) {
 
 function tracking_data_user($op, &$edit, &$account, $category = NULL) {
   if ($op === 'view') {
+    
+    $load_protovis = false; // assume no graph
 
     // For each dataset (represented by a 'top-level' taxonomy term)
     // create a new section in the user page for the graph to live in.
@@ -114,6 +116,7 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
     while ($r = db_fetch_array($q)) {
 
       $graph_name = $r['parent_name'];
+      $load_protovis = true;
 
       // Set up the overall category if not set up
       if (!isset($account->content['tracking_data'])) {
@@ -129,9 +132,17 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
         $account->content['tracking_data'][$graph_name] = array(
           '#type' => 'user_profile_item',
           '#title' => $graph_name,
+          '#attributes' => array(
+            'class' => 'tracking-data-graph-container',
+          ),
           '#value' => '<p>You need JavaScript enabled to view this data graph.</p>',
         );
       }
+    }
+
+    if ($load_protovis) {
+      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/protovis-r3.2.js');
+      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/user-graph.js');
     }
   }
 }
