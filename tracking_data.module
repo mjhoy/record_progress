@@ -134,6 +134,7 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
           '#title' => $graph_name,
           '#attributes' => array(
             'class' => 'tracking-data-graph-container',
+            'data-graph' => $graph_name,
           ),
           '#value' => '<p>You need JavaScript enabled to view this data graph.</p>',
         );
@@ -141,7 +142,17 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
     }
 
     if ($load_protovis) {
+
+      // Set 'json_url' as a setting for the JavaScript to use.
+      $opts = array('absolute' => TRUE);
+      $json_url = url('user/' . $account->uid . '/tracking_data.json', $opts);
+      drupal_add_js(array('tracking_data' =>
+        array("json_url" => $json_url)), 'setting');
+
+      // Add our module, Underscore, and Protovis JS.
+      // TODO: Use the 'Libraries' module for js libs?
       drupal_add_js(drupal_get_path('module', 'tracking_data') . '/protovis-r3.2.js');
+      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/underscore.js');
       drupal_add_js(drupal_get_path('module', 'tracking_data') . '/user-graph.js');
     }
   }
