@@ -87,6 +87,57 @@ function _tracking_data_form_validate($form, &$form_state) {
 }
 
 /**
+ * == User page handlers
+ */
+
+/**
+ * Implements hook_user().
+ *
+ * On the user page, we add a section for each data group the user has
+ * entered. These sections will be filled in with graphs by the
+ * javascript that's loaded.
+ */
+
+function tracking_data_user($op, &$edit, &$account, $category = NULL) {
+  if ($op === 'view') {
+
+    // For each dataset (represented by a 'top-level' taxonomy term)
+    // create a new section in the user page for the graph to live in.
+    $q = db_query("SELECT td.name, parent_td.name AS parent_name FROM {content_type_tracking_data} cttd
+      INNER JOIN {node} n ON cttd.vid = n.vid
+      INNER JOIN {term_node} tn ON tn.vid = n.vid
+      INNER JOIN {term_data} td ON td.tid = tn.tid
+      INNER JOIN {term_hierarchy} th ON th.tid = td.tid
+      INNER JOIN {term_data} parent_td ON parent_td.tid = th.parent
+      WHERE n.uid=%d", $account->uid);
+
+    while ($r = db_fetch_array($q)) {
+
+      $graph_name = $r['parent_name'];
+
+      // Set up the overall category if not set up
+      if (!isset($account->content['tracking_data'])) {
+        $account->content['tracking_data'] = array(
+          '#type' => 'user_profile_category',
+          '#title' => 'Tracking data',
+          '#weight' => 9
+        );
+      }
+
+      // The graph item setup
+      if (!isset($account->content['tracking_data'][$graph_name])) {
+        $account->content['tracking_data'][$graph_name] = array(
+          '#type' => 'user_profile_item',
+          '#title' => $graph_name,
+          '#value' => '<p>You need JavaScript enabled to view this data graph.</p>',
+        );
+      }
+    }
+  }
+}
+
+
+/**
  * == User data handlers
  */
 
