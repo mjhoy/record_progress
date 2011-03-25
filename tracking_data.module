@@ -1,9 +1,16 @@
 <?php
 
 /**
+ * == Form handlers
+ */
+
+/**
  * Implements hook_form_alter()
  *
- * Hide the title field. (It will be assigned a value on form submission.)
+ * Here, hide the title field.
+ * It will be assigned a value later, on form submission.
+ *
+ * Also tweak labels, for intelligibility.
  */
 function tracking_data_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'tracking_data_node_form') {
@@ -77,4 +84,63 @@ function _tracking_data_form_validate($form, &$form_state) {
       form_set_error('taxonomy', t('Please specify a data type.'));
     }
   }
+}
+
+/**
+ * == User data handlers
+ */
+
+/**
+ * Implements hook_menu().
+ * 
+ * Define the URIs that will supply user data.
+ */
+function tracking_data_menu() {
+  $items['user/%/tracking_data.json'] = array(
+    'title' => 'Tracking data JSON',
+    'page callback' => 'tracking_data_json',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * The tracking data JSON page callback.
+ */
+function tracking_data_json($uid) {
+  // Get the VIDs for tracking data.
+  // Big ugly query. To be cached.
+  $q = db_query("SELECT field_data_date_value, field_data_value_value, td.name, parent_td.name AS parent_name FROM {content_type_tracking_data} cttd
+    INNER JOIN {node} n ON cttd.vid = n.vid
+    INNER JOIN {term_node} tn ON tn.vid = n.vid
+    INNER JOIN {term_data} td ON td.tid = tn.tid
+    INNER JOIN {term_hierarchy} th ON th.tid = td.tid
+    INNER JOIN {term_data} parent_td ON parent_td.tid = th.parent
+    WHERE n.uid=%d", $uid);
+
+  $data = array();
+
+  $this_year = mktime(0, 0, 0, 1, 1);
+
+  while ($r = db_fetch_array($q)) {
+    $graph = $r['parent_name'];
+    $dataset = $r['name'];
+    $datestamp = $r['field_data_date_value'];
+    $y = $r['field_data_value_value'];
+
+    // Find the number of days from the beginning of this year 
+    // (January 1 of whatever year it is). This is the x-value in
+    // the user graph.
+    $x = round(($datestamp - $this_year) / 86400) + 1;
+
+    // Populate the data associated array.
+    $data[$graph][$dataset][] = array(
+      'x' => $x,
+      'y' => $y,
+    );
+  }
+
+  drupal_json($data);
 }
