@@ -41,18 +41,23 @@
           min_y = nestedFilter(dataSet, _.min, 'y'),
           max_x = nestedFilter(dataSet, _.max, 'x'),
           max_y = nestedFilter(dataSet, _.max, 'y'),
-          w = 600,
+          w = 555,
           h = 200,
           x = pv.Scale.linear((min_x - 40), (max_x + 40)).range(0, w),
-          y = pv.Scale.linear((min_y - 50), (max_y + 50)).range(0, h);
+          y = pv.Scale.linear((min_y - 50), (max_y + 50)).range(0, h),
+          paddingRight = 100;
 
       vis = new pv.Panel()
-        .width(w)
+        .width(w + paddingRight)
         .height(h)
         .canvas(domEl);
 
+      graph = vis.add(pv.Panel)
+        .width(w)
+        .height(h);
+
       /* Y-axis rule */
-      vis.add(pv.Rule)
+      graph.add(pv.Rule)
         .data(pv.range(0, (max_y + 50), 50))
         .bottom(function(d) { if (y(d) > 10) {return  y(d);} })
         .strokeStyle("#aaa")
@@ -74,7 +79,7 @@
       ];
 
       /* X-axis rule */
-      vis.add(pv.Rule)
+      graph.add(pv.Rule)
         .data(months)
         .left(function(d) { if (x(d['n']) > 15) { return x(d['n']); } else { return -20; } })
         .strokeStyle("#ccc")
@@ -83,13 +88,27 @@
         .text(function(d) { return d['month']; });
 
       _.map(dataSet, function(data, index) {
-        console.log(data);
-        vis.add(pv.Dot)
+        graph.add(pv.Dot)
           .data(data)
           .bottom(function(d) { return y(d['y']); })
           .left(function(d) { return x(d['x']); })
           .strokeStyle(function (d) { return (dataSet[index]['color'] || "#aaa"); })
           .add(pv.Line);
+      });
+
+      /* Legend */
+      console.log(dataSet, name);
+      var legendY = 0;
+
+      _.map(dataSet, function(data, key) {
+        legendY = legendY + 20;
+        vis.add(pv.Dot)
+          .data([key])
+          .top(legendY)
+          .right(80)
+          .fillStyle(function (d) { return (dataSet[key]['color'] || "#aaa"); })
+          .strokeStyle(function (d) { return (dataSet[key]['color'] || "#aaa"); })
+          .anchor("right").add(pv.Label);
       });
 
       vis.render();
