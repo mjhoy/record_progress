@@ -12,15 +12,15 @@
  *
  * Also tweak labels, for intelligibility.
  */
-function tracking_data_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'tracking_data_node_form') {
+function record_progress_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'record_progress_node_form') {
     $form['title']['#type'] = 'hidden';
 
     // Title field must have something in it to submit, but it will
     // be changed after submission.
     $form['title']['#value'] = 'title';
-    $form['#submit'][] = '_tracking_data_form_submit';
-    $form['#validate'][] = '_tracking_data_form_validate';
+    $form['#submit'][] = '_record_progress_form_submit';
+    $form['#validate'][] = '_record_progress_form_validate';
 
     // Change the title of the taxonomy field
     foreach ($form['taxonomy'] as $key => &$value) {
@@ -35,7 +35,7 @@ function tracking_data_form_alter(&$form, &$form_state, $form_id) {
  * Called on form submission. Set the title to a generated value,
  * composed of the username, date, and type of data.
  */
-function _tracking_data_form_submit($form, &$form_state) {
+function _record_progress_form_submit($form, &$form_state) {
   global $user;
   $username = $user->name;
 
@@ -53,9 +53,9 @@ function _tracking_data_form_submit($form, &$form_state) {
   }
 
   $form_state['values']['title'] = $username . ": " . $type_string . " for " . $date_string;
-  drupal_set_message('Data point saved. <a href="/node/add/tracking-data">Add another here</a>.');
+  drupal_set_message('Data point saved. <a href="/node/add/record-progress">Add another here</a>.');
   drupal_set_message('Your graph is updated at <a href="/user/' . $user->uid . '">your account page.</a>');
-  $form_state['#redirect'] = '/node/add/tracking-data';
+  $form_state['#redirect'] = '/node/add/record-progress';
 }
 
 /**
@@ -84,7 +84,7 @@ function _tracking_data_form_submit($form, &$form_state) {
  * We want to make sure the user checks "Breakfast", and not
  * "Diet"; and "Lines of code", and not "Coding".
  */
-function _tracking_data_form_validate($form, &$form_state) {
+function _record_progress_form_validate($form, &$form_state) {
   foreach($form_state['values']['taxonomy'] as $key => $value) {
     $tid = $value;
   }
@@ -111,14 +111,14 @@ function _tracking_data_form_validate($form, &$form_state) {
  * entered. These sections will be filled in with graphs by the
  * javascript that's loaded.
  */
-function tracking_data_user($op, &$edit, &$account, $category = NULL) {
+function record_progress_user($op, &$edit, &$account, $category = NULL) {
   if ($op === 'view') {
     
     $load_protovis = false; // assume no graph
 
     // For each dataset (represented by a 'top-level' taxonomy term)
     // create a new section in the user page for the graph to live in.
-    $q = db_query("SELECT td.name, parent_td.name AS parent_name FROM {content_type_tracking_data} cttd
+    $q = db_query("SELECT td.name, parent_td.name AS parent_name FROM {content_type_record_progress} cttd
       INNER JOIN {node} n ON cttd.vid = n.vid
       INNER JOIN {term_node} tn ON tn.vid = n.vid
       INNER JOIN {term_data} td ON td.tid = tn.tid
@@ -132,8 +132,8 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
       $load_protovis = true;
 
       // Set up the overall category if not set up
-      if (!isset($account->content['tracking_data'])) {
-        $account->content['tracking_data'] = array(
+      if (!isset($account->content['record_progress'])) {
+        $account->content['record_progress'] = array(
           '#type' => 'user_profile_category',
           '#title' => 'Progress',
           '#weight' => 9
@@ -141,12 +141,12 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
       }
 
       // The graph item setup
-      if (!isset($account->content['tracking_data'][$graph_name])) {
-        $account->content['tracking_data'][$graph_name] = array(
+      if (!isset($account->content['record_progress'][$graph_name])) {
+        $account->content['record_progress'][$graph_name] = array(
           '#type' => 'user_profile_item',
           '#title' => $graph_name,
           '#attributes' => array(
-            'class' => 'tracking-data-graph-container',
+            'class' => 'record-progress-graph-container',
             'data-graph' => $graph_name,
           ),
           '#value' => '<p>You need JavaScript enabled to view this data graph.</p>',
@@ -158,15 +158,15 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
 
       // Set 'json_url' as a setting for the JavaScript to use.
       $opts = array('absolute' => TRUE);
-      $json_url = url('user/' . $account->uid . '/tracking_data.json', $opts);
-      drupal_add_js(array('tracking_data' =>
+      $json_url = url('user/' . $account->uid . '/progress.json', $opts);
+      drupal_add_js(array('record_progress' =>
         array("json_url" => $json_url)), 'setting');
 
       // Add our module, Underscore, and Protovis JS.
       // TODO: Use the 'Libraries' module for js libs?
-      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/protovis-r3.2.js');
-      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/underscore.js');
-      drupal_add_js(drupal_get_path('module', 'tracking_data') . '/user-graph.js');
+      drupal_add_js(drupal_get_path('module', 'record_progress') . '/protovis-r3.2.js');
+      drupal_add_js(drupal_get_path('module', 'record_progress') . '/underscore.js');
+      drupal_add_js(drupal_get_path('module', 'record_progress') . '/user-graph.js');
     }
   }
 }
@@ -181,10 +181,10 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
  * 
  * Define the URIs that will supply user data.
  */
-function tracking_data_menu() {
-  $items['user/%/tracking_data.json'] = array(
-    'title' => 'Tracking data JSON',
-    'page callback' => 'tracking_data_json',
+function record_progress_menu() {
+  $items['user/%/progress.json'] = array(
+    'title' => 'Recorded progress JSON',
+    'page callback' => 'record_progress_json',
     'page arguments' => array(1),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -193,12 +193,12 @@ function tracking_data_menu() {
 }
 
 /**
- * The tracking data JSON page callback.
+ * The  JSON page callback.
  */
-function tracking_data_json($uid) {
-  // Get the VIDs for tracking data.
+function record_progress_json($uid) {
+  // Get the VIDs for record_progress.
   // Big ugly query. To be cached.
-  $q = db_query("SELECT field_data_date_value, field_data_value_value, td.name, parent_td.name AS parent_name FROM {content_type_tracking_data} cttd
+  $q = db_query("SELECT field_data_date_value, field_data_value_value, td.name, parent_td.name AS parent_name FROM {content_type_record_progress} cttd
     INNER JOIN {node} n ON cttd.vid = n.vid
     INNER JOIN {term_node} tn ON tn.vid = n.vid
     INNER JOIN {term_data} td ON td.tid = tn.tid

@@ -3,12 +3,12 @@
 /**
  * Implements hook_install
  */
-function tracking_data_install() {
-  $td_vocab_name = "Tracking data type";
+function record_progress_install() {
+  $td_vocab_name = "Record progress type";
   $t = get_t();
 
   // Load in the CCK export file. This populates the variable $content
-  $filename =  drupal_get_path('module', 'tracking_data') . '/cck-export.txt';
+  $filename =  drupal_get_path('module', 'record_progress') . '/cck-export.txt';
   $content = implode( '', file($filename) );
 
   // Submit a "form" using content_copy_import_form()
@@ -24,32 +24,32 @@ function tracking_data_install() {
 
   $q = db_query("SELECT vid FROM {vocabulary} WHERE name='" . $td_vocab_name . "';");
   $r = db_fetch_object($q);
-  // Install the "Tracking data type" vocab
+  // Install the "Record progress type" vocab
   $vocabulary = array(
     'name' => $td_vocab_name,
     'multiple' => 0, //set 1 to allow multiple selection
     'required' => 1, //set 1 to make the terms mandatory to be selected
     'hierarchy' => 1, //set 1 to allow and create hierarchy of the terms within the vocabulary
     'relations' => 0, //set 1 to set and allow relation amongst multiple terms
-    'module' => 'tracking_data', //provide the module name in which the vocabulary is defined and which is calling this function
-    'nodes' => array('tracking_data' => 1), //set the node to which this vocabulary will be attached to
+    'module' => 'record_progress', //provide the module name in which the vocabulary is defined and which is calling this function
+    'nodes' => array('record_progress' => 1), //set the node to which this vocabulary will be attached to
     'weight' => 1, //set the weight to display the vocabulary in the list
   );
   taxonomy_save_vocabulary($vocabulary);
-  drupal_set_message($t('Note: you\'ll need to define some taxonomy terms for the tracking data vocabulary.'));
+  drupal_set_message($t('Note: you\'ll need to define some taxonomy terms for the record progress vocabulary.'));
 
 }
 
 /**
  * Implements hook_uninstall
  *
- * Removes the tracking_data content type.
+ * Removes the record_progress content type.
  * TODO: should it run through the database and delete any nodes of this type?
  */
-function tracking_data_uninstall() {
+function record_progress_uninstall() {
 
   $t = get_t();
-  $content_type = 'tracking_data';
+  $content_type = 'record_progress';
   
   // Content fields
   $content = content_types($content_type);

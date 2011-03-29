@@ -116,7 +116,7 @@
 
     $(document).ready(function () {
 
-      var graphContainerSelector = 'dd.tracking-data-graph-container',
+      var graphContainerSelector = 'dd.record-progress-graph-container',
           placeholderClass = 'graph-placeholder',
           // The JSON url for the data is set by the Drupal module.
           json_url = Drupal.settings.tracking_data.json_url;
@@ -157,7 +157,7 @@
       }
 
         // Top level taxonomy term that defines the type of data in a graph.
-        // See tracking_data.module.
+        // See record_progress.module.
         // var graphType = $(this).attr('data-graph');
 
         // The HTML element to which Protovis will render a graph

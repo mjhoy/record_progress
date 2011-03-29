@@ -1,4 +1,4 @@
-name = Tracking data (content type)
+name = Record progress (content type)
 description = Content type for users to track data and see their progress with a graph
 core = 6.x
 php = 5.1
