@@ -32,7 +32,8 @@ function tracking_data_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Called on form submission. Set the title to a generated value.
+ * Called on form submission. Set the title to a generated value,
+ * composed of the username, date, and type of data.
  */
 function _tracking_data_form_submit($form, &$form_state) {
   global $user;
@@ -41,7 +42,17 @@ function _tracking_data_form_submit($form, &$form_state) {
   $date = $form_state['values']['field_data_date'][0]['value'];
   $date_string = strftime('%d %b %Y', $date);
 
-  $form_state['values']['title'] = $username . ": data for " . $date_string;
+  $type_string = "data"; // default type name.
+  foreach($form_state['values']['taxonomy'] as $key => $value) {
+    $tid = $value;
+  }
+  if ($tid) {
+    $q = db_query("SELECT name FROM {term_data} WHERE tid=%d", $tid);
+    $r = db_fetch_object($q);
+    $type_string = $r->name;
+  }
+
+  $form_state['values']['title'] = $username . ": " . $type_string . " for " . $date_string;
 }
 
 /**
