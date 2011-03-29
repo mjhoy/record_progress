@@ -53,6 +53,9 @@ function _tracking_data_form_submit($form, &$form_state) {
   }
 
   $form_state['values']['title'] = $username . ": " . $type_string . " for " . $date_string;
+  drupal_set_message('Data point saved. <a href="/node/add/tracking-data">Add another here</a>.');
+  drupal_set_message('Your graph is updated at <a href="/user/' . $user->uid . '">your account page.</a>');
+  $form_state['#redirect'] = '/node/add/tracking-data';
 }
 
 /**
