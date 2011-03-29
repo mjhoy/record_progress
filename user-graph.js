@@ -8,6 +8,21 @@
 
   if (Drupal.jsEnabled) {
 
+    // TODO: make this an attribute on the taxonomy terms? not sure
+    // how to do this.
+    //
+    // these colors come from http://colorapi.com/ searching "gym",
+    // "workout", "weight lifting"...
+    var colorCycle = [
+      "#A75625",
+      "#592409",
+      "#474D53",
+      "#587399",
+      "#493E2A"
+    ];
+
+    var colorIndex = 0;
+
     // Uses filter `filter` (meant to be either _.min or _.max) 
     // on property `property` for an array of arrays.
     function nestedFilter(dataSet, filter, property) {
@@ -103,6 +118,14 @@
 
             var dataSet = data[key],
                 domEl = $(graphContainerSelector + '[data-graph="' + key + '"] .' + placeholderClass)[0];
+
+            // Apply colors from the color cycle
+            _.each(dataSet, function (d) {
+              if (!d.color) {
+                d.color = colorCycle[colorIndex];
+                colorIndex = (colorIndex + 1) % colorCycle.length;
+              }
+            });
 
             setupProtovisGraph(domEl, key, dataSet);
           });
