@@ -97,7 +97,6 @@
       });
 
       /* Legend */
-      console.log(dataSet, name);
       var legendY = 0;
 
       _.map(dataSet, function(data, key) {
@@ -119,7 +118,7 @@
       var graphContainerSelector = 'dd.record-progress-graph-container',
           placeholderClass = 'graph-placeholder',
           // The JSON url for the data is set by the Drupal module.
-          json_url = Drupal.settings.tracking_data.json_url;
+          json_url = Drupal.settings.record_progress.json_url;
 
       if (json_url) {
 
