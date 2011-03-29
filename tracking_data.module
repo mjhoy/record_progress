@@ -97,7 +97,6 @@ function _tracking_data_form_validate($form, &$form_state) {
  * entered. These sections will be filled in with graphs by the
  * javascript that's loaded.
  */
-
 function tracking_data_user($op, &$edit, &$account, $category = NULL) {
   if ($op === 'view') {
     
@@ -122,7 +121,7 @@ function tracking_data_user($op, &$edit, &$account, $category = NULL) {
       if (!isset($account->content['tracking_data'])) {
         $account->content['tracking_data'] = array(
           '#type' => 'user_profile_category',
-          '#title' => 'Tracking data',
+          '#title' => 'Progress',
           '#weight' => 9
         );
       }
