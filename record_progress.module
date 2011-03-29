@@ -1,6 +1,17 @@
 <?php
 
 /**
+ * Implements hook_preprocess_page()
+ *
+ * Set the form title to something not so silly.
+ */
+function record_progress_preprocess_page(&$variables) {
+  if ($variables['title'] === "Create Record progress") {
+    $variables['title'] = "Add data point";
+  }
+}
+
+/**
  * == Form handlers
  */
 
