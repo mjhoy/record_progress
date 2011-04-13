@@ -43,6 +43,20 @@ function record_progress_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
+ * Implements hook_nodeapi()
+ *
+ * Clear the user's cache when any data has changed.
+ */
+function record_progress_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($node->type == 'record_progress') {
+    if ($op == 'insert' || $op == 'delete' || $op == 'update') {
+      $uid = $node->uid;
+      cache_clear_all('record_progress_user_' + $uid, 'cache');
+    }
+  }
+}
+
+/**
  * Called on form submission. Set the title to a generated value,
  * composed of the username, date, and type of data.
  */
@@ -68,6 +82,7 @@ function _record_progress_form_submit($form, &$form_state) {
   drupal_set_message('Your graph is updated at <a href="/user/' . $user->uid . '">your account page.</a>');
   $form_state['#redirect'] = '/node/add/record-progress';
 }
+
 
 /**
  * Form validation
@@ -207,37 +222,51 @@ function record_progress_menu() {
  * The  JSON page callback.
  */
 function record_progress_json($uid) {
-  // Get the VIDs for record_progress.
-  // Big ugly query. To be cached.
-  $q = db_query("SELECT field_data_date_value, field_data_value_value, td.name, parent_td.name AS parent_name FROM {content_type_record_progress} cttd
-    INNER JOIN {node} n ON cttd.vid = n.vid
-    INNER JOIN {term_node} tn ON tn.vid = n.vid
-    INNER JOIN {term_data} td ON td.tid = tn.tid
-    INNER JOIN {term_hierarchy} th ON th.tid = td.tid
-    INNER JOIN {term_data} parent_td ON parent_td.tid = th.parent
-    WHERE n.uid=%d
-    ORDER BY field_data_date_value ASC", $uid);
 
-  $data = array();
+  static $data;
 
-  $this_year = mktime(0, 0, 0, 1, 1);
+  if (!isset($data)) {
 
-  while ($r = db_fetch_array($q)) {
-    $graph = $r['parent_name'];
-    $dataset = $r['name'];
-    $datestamp = $r['field_data_date_value'];
-    $y = $r['field_data_value_value'];
+    if (($cache = cache_get('record_progress_user_' + $uid)) && !empty($cache)) {
+      $data = $cache->data;
+    }
+    else {
 
-    // Find the number of days from the beginning of this year 
-    // (January 1 of whatever year it is). This is the x-value in
-    // the user graph.
-    $x = round(($datestamp - $this_year) / 86400) + 1;
+      // Get the VIDs for record_progress.
+      // Big ugly query. To be cached.
+      $q = db_query("SELECT field_data_date_value, field_data_value_value, td.name, parent_td.name AS parent_name FROM {content_type_record_progress} cttd
+        INNER JOIN {node} n ON cttd.vid = n.vid
+        INNER JOIN {term_node} tn ON tn.vid = n.vid
+        INNER JOIN {term_data} td ON td.tid = tn.tid
+        INNER JOIN {term_hierarchy} th ON th.tid = td.tid
+        INNER JOIN {term_data} parent_td ON parent_td.tid = th.parent
+        WHERE n.uid=%d
+        ORDER BY field_data_date_value ASC", $uid);
 
-    // Populate the data associated array.
-    $data[$graph][$dataset][] = array(
-      'x' => $x,
-      'y' => $y,
-    );
+      $data = array();
+
+      $this_year = mktime(0, 0, 0, 1, 1);
+
+      while ($r = db_fetch_array($q)) {
+        $graph = $r['parent_name'];
+        $dataset = $r['name'];
+        $datestamp = $r['field_data_date_value'];
+        $y = $r['field_data_value_value'];
+
+        // Find the number of days from the beginning of this year 
+        // (January 1 of whatever year it is). This is the x-value in
+        // the user graph.
+        $x = round(($datestamp - $this_year) / 86400) + 1;
+
+        // Populate the data associated array.
+        $data[$graph][$dataset][] = array(
+          'x' => $x,
+          'y' => $y,
+        );
+      }
+
+      cache_set('record_progress_user_' + $uid, $data, 'cache');
+    }
   }
 
   drupal_json($data);
