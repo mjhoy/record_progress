@@ -61,8 +61,10 @@ function record_progress_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  * composed of the username, date, and type of data.
  */
 function _record_progress_form_submit($form, &$form_state) {
-  global $user;
+  $uid = $form['#node']->uid;
+  $user = user_load($uid);
   $username = $user->name;
+
 
   $date = $form_state['values']['field_data_date'][0]['value'];
   $date_string = strftime('%d %b %Y', $date);
