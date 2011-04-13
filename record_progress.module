@@ -215,7 +215,8 @@ function record_progress_json($uid) {
     INNER JOIN {term_data} td ON td.tid = tn.tid
     INNER JOIN {term_hierarchy} th ON th.tid = td.tid
     INNER JOIN {term_data} parent_td ON parent_td.tid = th.parent
-    WHERE n.uid=%d", $uid);
+    WHERE n.uid=%d
+    ORDER BY field_data_date_value ASC", $uid);
 
   $data = array();
 
