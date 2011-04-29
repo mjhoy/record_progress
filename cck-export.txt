@@ -124,7 +124,7 @@ $content['fields']  = array (
   array (
     'label' => 'Value',
     'field_name' => 'field_data_value',
-    'type' => 'number_integer',
+    'type' => 'number_decimal',
     'widget_type' => 'number',
     'change' => 'Change basic information',
     'weight' => '-3',
@@ -154,6 +154,8 @@ $content['fields']  = array (
     'multiple' => '0',
     'min' => '',
     'max' => '',
+    'precision' => '20',
+    'scale' => '2',
     'prefix' => '',
     'suffix' => '',
     'allowed_values' => '',
@@ -165,7 +167,9 @@ $content['fields']  = array (
     array (
       'value' => 
       array (
-        'type' => 'int',
+        'type' => 'numeric',
+        'precision' => '20',
+        'scale' => '2',
         'not null' => false,
         'sortable' => true,
       ),
