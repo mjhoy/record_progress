@@ -155,7 +155,7 @@ $content['fields']  = array (
     'min' => '',
     'max' => '',
     'precision' => '20',
-    'scale' => '2',
+    'scale' => '4',
     'prefix' => '',
     'suffix' => '',
     'allowed_values' => '',
@@ -169,7 +169,7 @@ $content['fields']  = array (
       array (
         'type' => 'numeric',
         'precision' => '20',
-        'scale' => '2',
+        'scale' => '4',
         'not null' => false,
         'sortable' => true,
       ),
